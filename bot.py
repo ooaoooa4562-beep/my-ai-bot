@@ -4,12 +4,10 @@ from openai import OpenAI
 from flask import Flask
 import threading
 
-# ===== НАСТРОЙКИ =====
-BOT_TOKEN = os.getenv("8769849422:AAFQQvHYP2gLlSXcxjgmO1YsERGInkGCo1k")
-AGNES_API_KEY = os.getenv("sk-3d0gk4OWkZIcfYAmXZT1NSunwhn2NF8qYYW6kCuUZ34H0ctu")
-
-if not BOT_TOKEN or not AGNES_API_KEY:
-    raise ValueError("❌ Ошибка: BOT_TOKEN или AGNES_API_KEY не заданы!")
+# ===== ВСТАВЬ СВОИ КЛЮЧИ СЮДА =====
+BOT_TOKEN = "8769849422:AAFQQvHYP2gLlSXcxjgmO1YsERGInkGCo1k"  # Например: 123456:ABCdef
+AGNES_API_KEY = "sk-3d0gk4OWkZIcfYAmXZT1NSunwhn2NF8qYYW6kCuUZ34H0ctu"   # Например: sk-3d0...
+# ====================================
 
 bot = telebot.TeleBot(BOT_TOKEN)
 client = OpenAI(
@@ -19,7 +17,7 @@ client = OpenAI(
 
 user_history = {}
 
-# ===== КОМАНДЫ БОТА =====
+# ===== КОМАНДЫ =====
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "🤖 Привет! Я ИИ-помощник на базе Agnes AI!\n\n✍️ Задавай любой вопрос!")
@@ -62,7 +60,6 @@ app = Flask(name)
 def home():
     return "✅ Бот работает! 😊"
 
-# ===== ЗАПУСК =====
 def run_bot():
     print("🤖 Бот запущен...")
     bot.infinity_polling()
