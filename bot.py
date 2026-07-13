@@ -64,6 +64,6 @@ def run_bot():
     print("🤖 Бот запущен...")
     bot.infinity_polling()
 
-if name == "main":
+if name == "__main__":
     threading.Thread(target=run_bot).start()
     app.run(host='0.0.0.0', port=10000)
