@@ -54,7 +54,7 @@ def answer(message):
         bot.reply_to(message, f"❌ Ошибка: {str(e)}")
 
 # ===== ЗАГЛУШКА ДЛЯ RENDER =====
-app = Flask(name)
+app = Flask(__name__)
 
 @app.route('/')
 def home():
