@@ -5,7 +5,7 @@ from flask import Flask
 import threading
 import json
 
-BOT_TOKEN = "твой_токен_от_BotFather"  # Вставь свой токен
+BOT_TOKEN = "8769849422:AAFQQvHYP2gLlSXcxjgmO1YsERGInkGCo1k"  # Вставь свой токен
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
