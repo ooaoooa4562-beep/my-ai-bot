@@ -1,33 +1,26 @@
-import os
+
 import telebot
-from openai import OpenAI
+import requests
 from flask import Flask
 import threading
+import json
 
-# ===== ВСТАВЬ СВОИ КЛЮЧИ СЮДА =====
-BOT_TOKEN = "8769849422:AAFQQvHYP2gLlSXcxjgmO1YsERGInkGCo1k"  # Например: 123456:ABCdef
-AGNES_API_KEY = "sk-3d0gk4OWkZIcfYAmXZT1NSunwhn2NF8qYYW6kCuUZ34H0ctu"   # Например: sk-3d0...
-# ====================================
+BOT_TOKEN = "твой_токен_от_BotFather"  # Вставь свой токен
 
 bot = telebot.TeleBot(BOT_TOKEN)
-client = OpenAI(
-    api_key=AGNES_API_KEY,
-    base_url="https://apihub.agnes-ai.com/v1"
-)
 
 user_history = {}
 
-# ===== КОМАНДЫ =====
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "🤖 Привет! Я ИИ-помощник на базе Agnes AI!\n\n✍️ Задавай любой вопрос!")
+    bot.reply_to(message, "🤖 Привет! Я бесплатный ИИ-помощник!\n\nЗадавай любой вопрос!")
 
 @bot.message_handler(commands=['clear'])
 def clear_history(message):
     chat_id = str(message.chat.id)
     if chat_id in user_history:
         user_history[chat_id] = []
-    bot.reply_to(message, "🧹 История диалога очищена!")
+    bot.reply_to(message, "🧹 История очищена!")
 
 @bot.message_handler(func=lambda msg: True)
 def answer(message):
@@ -42,23 +35,34 @@ def answer(message):
 
     try:
         bot.send_chat_action(message.chat.id, "typing")
-        response = client.chat.completions.create(
-            model="agnes-2.0-flash",
-            messages=messages_to_send,
-            temperature=0.7
-        )
-        reply = response.choices[0].message.content
-        user_history[chat_id].append({"role": "assistant", "content": reply})
-        bot.reply_to(message, reply)
+
+        url = "https://keylessai.thryx.workers.dev/v1/chat/completions"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "model": "openai-fast",
+            "messages": messages_to_send,
+            "temperature": 0.7
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
+        data = response.json()
+
+        if response.status_code == 200:
+            reply = data["choices"][0]["message"]["content"]
+            user_history[chat_id].append({"role": "assistant", "content": reply})
+            bot.reply_to(message, reply)
+        else:
+            bot.reply_to(message, f"❌ Ошибка API: {data}")
+
     except Exception as e:
         bot.reply_to(message, f"❌ Ошибка: {str(e)}")
 
-# ===== ЗАГЛУШКА ДЛЯ RENDER =====
+# Заглушка для Render
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "✅ Бот работает! 😊"
+    return "✅ Бот работает!"
 
 def run_bot():
     print("🤖 Бот запущен...")
