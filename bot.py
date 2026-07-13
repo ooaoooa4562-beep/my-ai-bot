@@ -1,4 +1,3 @@
-
 import telebot
 import requests
 from flask import Flask
@@ -13,7 +12,7 @@ user_history = {}
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "🤖 Привет! Я бесплатный ИИ-помощник!\n\nЗадавай любой вопрос!")
+    bot.reply_to(message, "🤖 Привет! Я бесплатный ИИ-помощник на LocalAI!\n\nЗадавай любой вопрос!")
 
 @bot.message_handler(commands=['clear'])
 def clear_history(message):
@@ -36,15 +35,16 @@ def answer(message):
     try:
         bot.send_chat_action(message.chat.id, "typing")
 
-        url = "https://keylessai.thryx.workers.dev/v1/chat/completions"
+        # Используем общедоступный LocalAI эндпоинт
+        url = "https://localai.io/api/v1/chat/completions"
         headers = {"Content-Type": "application/json"}
         payload = {
-            "model": "openai-fast",
+            "model": "llama3",
             "messages": messages_to_send,
             "temperature": 0.7
         }
 
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
         data = response.json()
 
         if response.status_code == 200:
@@ -54,11 +54,13 @@ def answer(message):
         else:
             bot.reply_to(message, f"❌ Ошибка API: {data}")
 
+    except requests.exceptions.Timeout:
+        bot.reply_to(message, "❌ Превышено время ожидания. Попробуй ещё раз.")
     except Exception as e:
         bot.reply_to(message, f"❌ Ошибка: {str(e)}")
 
 # Заглушка для Render
-app = Flask(__name__)
+app = Flask(name)
 
 @app.route('/')
 def home():
@@ -68,6 +70,6 @@ def run_bot():
     print("🤖 Бот запущен...")
     bot.infinity_polling()
 
-if __name__ == "__main__":
+if name == "main":
     threading.Thread(target=run_bot).start()
     app.run(host='0.0.0.0', port=10000)
